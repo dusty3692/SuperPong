@@ -2,8 +2,10 @@
 //December 7th, 2016
 //A simple Pong clone
 
-#include <Arduboy.h>
-Arduboy arduboy;
+#include <Arduboy2.h>
+#include <ArduboyPlaytune.h>
+Arduboy2 arduboy;
+ArduboyPlaytune tunes(arduboy.audio.enabled);
 //Variables declared here
 // Playtune bytestream for file "E:\Arduino Stuff\Resources\4097211-Take_on_Me_-_a-ha.mid" created by MIDI2TONES V1.0.0 on Sun Apr 01 16:44:03 2018
 // command line: midi2tones_64bit.exe E:\Arduino Stuff\Resources\4097211-Take_on_Me_-_a-ha 
@@ -320,7 +322,6 @@ int counter = 0;
 int ballx = 62;
 int bally = 31;
 int ballsize = 4;
-int sound = 1;
 int ballright = -1;
 int balldown = 1;
 int paddlewidth = 4;
@@ -340,8 +341,20 @@ void resetgame(){
 
 void setup() {
   arduboy.begin();
+
+  // audio setup
+  tunes.initChannel(PIN_SPEAKER_1);
+#ifndef AB_DEVKIT
+  // if not a DevKit
+  tunes.initChannel(PIN_SPEAKER_2);
+#else
+  // if it's a DevKit
+  tunes.initChannel(PIN_SPEAKER_1); // use the same pin for both channels
+  tunes.toneMutesScore(true);       // mute the score when a tone is sounding
+#endif
+
   //Seed the random number generator
-  srand(7/8);
+  arduboy.initRandomSeed();
   //Set the game to 60 frames per second
   arduboy.setFrameRate(60);
   arduboy.clear();
@@ -357,8 +370,8 @@ void loop() {
   switch( gamestate ) {
     case 0:
       //Title screen
-      if(!arduboy.tunes.playing() and sound == 1){
-      arduboy.tunes.playScore(title);
+      if(!tunes.playing()){
+        tunes.playScore(title);
       }
       arduboy.drawBitmap(-5,-10,logo,128,64,WHITE);
       counter = counter + 1; //Increase counter variable
@@ -372,14 +385,14 @@ void loop() {
       //Change the gamestate
       
       if(arduboy.pressed(A_BUTTON) and justpressed == 0) {
-        arduboy.tunes.stopScore();
+        tunes.stopScore();
         justpressed = 1;
         gamestate = 1;
       }
       break;
     case 1:
-    if(!arduboy.tunes.playing() and sound == 1){
-    arduboy.tunes.playScore(difficulty);
+    if(!tunes.playing()){
+      tunes.playScore(difficulty);
     }
       //Difficuly set
       if(movechance ==15) {
@@ -422,21 +435,21 @@ void loop() {
       }
       if (arduboy.pressed(A_BUTTON) and justpressed == 0) {
         gamestate = 2;
-        arduboy.tunes.stopScore();
+        tunes.stopScore();
       }
       break;
     case 2:
-      if(!arduboy.tunes.playing() and sound == 1){
-      arduboy.tunes.playScore(game);
+      if(!tunes.playing()){
+        tunes.playScore(game);
       }
       //Gameplay screen
       if(playerscore ==5) {
         gamestate = 3;
-        arduboy.tunes.stopScore();
+        tunes.stopScore();
       }
       if(computerscore == 5) {
         gamestate = 4;
-        arduboy.tunes.stopScore();
+        tunes.stopScore();
       }
       arduboy.setCursor(20, 0);
       arduboy.print(playerscore);
@@ -528,8 +541,8 @@ void loop() {
       break;
     case 3:
       //Win screen
-      if(!arduboy.tunes.playing() and sound == 1){
-      arduboy.tunes.playScore(good);
+      if(!tunes.playing()){
+        tunes.playScore(good);
       };
       arduboy.drawBitmap(-5,-3,win,128,64,WHITE);
        counter = counter + 1; //Increase counter variable
@@ -545,13 +558,13 @@ void loop() {
         resetgame();
         justpressed = 1;
         gamestate = 0;
-         arduboy.tunes.stopScore();
+        tunes.stopScore();
       }
       break;
     case 4:
       //Game over screen
-      if(!arduboy.tunes.playing() and sound == 1){
-      arduboy.tunes.playScore(dead);
+      if(!tunes.playing()){
+        tunes.playScore(dead);
       };
       arduboy.drawBitmap(0,0,lose,128,64,WHITE);
       counter = counter + 1; //Increase counter variable
@@ -568,7 +581,7 @@ void loop() {
         death = 0;
         justpressed = 1;
         gamestate = 0;
-        arduboy.tunes.stopScore();
+        tunes.stopScore();
       }
         break;
   }
@@ -588,15 +601,12 @@ void loop() {
   if(arduboy.notPressed(B_BUTTON)) {
     justpressedb = 0;
   }
-  if(sound == 0) {
-    arduboy.tunes.stopScore();
-  }
-  if(arduboy.pressed(B_BUTTON) and justpressedb == 0 and sound == 1) {
-        sound = 0;
+  if(arduboy.pressed(B_BUTTON) and justpressedb == 0 and arduboy.audio.enabled()) {
+        arduboy.audio.off();
         justpressedb = 1;
       }
-      if(arduboy.pressed(B_BUTTON) and justpressedb == 0 and sound == 0) {
-        sound = 1;
+      if(arduboy.pressed(B_BUTTON) and justpressedb == 0 and !arduboy.audio.enabled()) {
+        arduboy.audio.on();
         justpressedb = 1;
       }
   arduboy.display();
