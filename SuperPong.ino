@@ -436,7 +436,6 @@ void loop() {
       if (arduboy.pressed(A_BUTTON) and justpressed == 0) {
         gamestate = 16;
         justpressed = 1;
-        tunes.stopScore();
       }
       break;
     case 16:
