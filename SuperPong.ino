@@ -7,6 +7,20 @@
 Arduboy2 arduboy;
 ArduboyPlaytune tunes(arduboy.audio.enabled);
 //Variables declared here
+const byte wall[] PROGMEM = {
+ 0x90,58, 0x91,77, 0,23, 0x80, 0,11, 0x81,
+ 0xf0
+};
+const byte point[] PROGMEM = {
+ 0x90,71, 0,11, 0x80,
+ 0xf0
+};
+int justpressedr = 0;
+int justpressedl = 0;
+const byte paddle[] PROGMEM = {
+ 0x90,89, 0x91,98, 0,11, 0x92,70, 0,11, 0x80, 0x81, 0x82,
+ 0xf0
+};
 const byte good[] PROGMEM = {
  2,43, 0x90,54, 0x91,49, 0,111, 0x92,42, 0x90,54, 0x91,49, 1,77, 0x92,42, 0x90,61, 0x91,66, 1,77, 0x92,42,
  0x90,61, 0x91,58, 1,77, 0x92,42, 0,222, 0x90,58, 0x91,49, 0,111, 0x92,47, 0x90,54, 0x91,59, 1,77, 0x92,47,
@@ -301,17 +315,21 @@ int counter = 0;
 int ballx = 62;
 int bally = 31;
 int ballsize = 4;
+int origc = 0;
 int ballright = -1;
 int balldown = 1;
 int paddlewidth = 4;
 int paddleheight = 9;
 int playerx = 0;
+int orig = 0;
+int sound = 1;
 int endless = 0;
 int playery = 0;
 int computerx = 127 - paddlewidth;
 int computery = 0;
 int playerscore = 0;
 int computerscore = 0;
+int menuselect = 1;
 void resetgame(){
   ballx = 63;
   bally = 31;
@@ -357,10 +375,14 @@ void loop() {
       counter = counter + 1; //Increase counter variable
       if(counter < 45) {
         arduboy.setCursor(4,55);
-        arduboy.print("A = PLAY   B = MUSIC"); //If the counter is less than 60, show the text
+        arduboy.print("A = PLAY   B = MENU"); //If the counter is less than 60, show the text
       }
       if(counter >= 90) {
         counter = 0; //If counter is greater than or less than 120, reset it back to 0
+      }
+       if (arduboy.pressed(B_BUTTON) and justpressedb == 0){
+        gamestate = 9;
+        justpressedb = 1;
       }
       //Change the gamestate
       
@@ -468,8 +490,126 @@ void loop() {
         tunes.stopScore();
       }
       break;
-    case 2:
+    case 54:
+    if(!tunes.playing()){
+      tunes.playScore(title);
+    }
+    arduboy.setCursor(0,16);
+    arduboy.print("SOUND NEEDS TO BE");
+    arduboy.print("\n");
+    arduboy.print("ON TO ENABLE");
+    arduboy.print("\n");
+    arduboy.print("ORIGINAL SFX");
+    menuselect = 1;
+    counter = counter + 1;
+       if(counter < 45) {
+        arduboy.setCursor(0,55);
+        arduboy.print("press B to go to menu"); //If the counter is less than 60, show the text
+      }
+      if(counter >= 90) {
+        counter = 0; //If counter is greater than or less than 120, reset it back to 0
+      }
+      if (arduboy.pressed(B_BUTTON)) {
+        justpressedb = 1;
+        gamestate = 9;
+      }
+      break;
+    case 9:
+      //menu
+      if(sound == 0) {
+        orig = 0;
+      }
+      if(sound == 0 and menuselect == 2) {
+        gamestate = 54;
+      }
+      counter = counter + 1;
+       if(counter < 45) {
+        arduboy.setCursor(20,55);
+        arduboy.print("press B to exit"); //If the counter is less than 60, show the text
+      }
+      if(counter >= 90) {
+        counter = 0; //If counter is greater than or less than 120, reset it back to 0
+      }
       if(!tunes.playing()){
+        tunes.playScore(title);
+      }
+      if(arduboy.pressed(B_BUTTON) and justpressedb == 0) {
+        justpressedb = 1;
+        gamestate = 0;
+      }
+      if(arduboy.pressed(DOWN_BUTTON) and justpressedd == 0) {
+        justpressedd = 1;
+        menuselect = menuselect + 1;
+      }
+      if(arduboy.pressed(UP_BUTTON) and justpressedu == 0) {
+        justpressedu = 1;
+        menuselect = menuselect - 1;
+      }
+      if (menuselect == 0) {
+        menuselect = 1;
+      }
+      if (menuselect == 3) {
+        menuselect = 2;
+      }
+      if(menuselect == 1) {
+        if(arduboy.pressed(RIGHT_BUTTON) and justpressedr == 0) {
+        justpressedr = 1;
+        sound = 0;
+      }
+      if(arduboy.pressed(LEFT_BUTTON) and justpressedl == 0) {
+        justpressedl = 1;
+        sound = 1;
+      }
+        if(sound == 1){
+          arduboy.setCursor(10, 10);
+          arduboy.print(">SOUND ON>");
+        }
+        if(sound == 0){
+         arduboy.setCursor(10, 10);
+         arduboy.print(">SOUND <OFF");
+        }
+      }
+      if(menuselect > 1) {
+        if(sound == 1){
+          arduboy.setCursor(10, 10);
+          arduboy.print("SOUND ON>");
+        }
+        if(sound == 0){
+         arduboy.setCursor(10, 10);
+         arduboy.print("SOUND <OFF");
+        }
+      }
+      if(menuselect == 2) {
+        if(arduboy.pressed(RIGHT_BUTTON) and justpressedr == 0) {
+        justpressedr = 1;
+        orig = 0;
+      }
+      if(arduboy.pressed(LEFT_BUTTON) and justpressedl == 0) {
+        justpressedl = 1;
+        orig = 1;
+      }
+      if(orig == 1){
+          arduboy.setCursor(10, 20);
+          arduboy.print(">ORIGINAL SFX ON>");
+        }
+        if(orig == 0){
+         arduboy.setCursor(10, 20);
+         arduboy.print(">ORIGINAL SFX <OFF");
+        }
+      }
+       if(menuselect > 2 or menuselect < 2 ) {
+        if(orig == 1){
+          arduboy.setCursor(10, 20);
+          arduboy.print("ORIGINAL SFX ON>");
+        }
+        if(orig == 0){
+         arduboy.setCursor(10, 20);
+         arduboy.print("ORIGINAL SFX <OFF");
+        }
+       } 
+      break;
+    case 2:
+      if(!tunes.playing() and orig == 0){
         tunes.playScore(game);
       }
       //Gameplay screen
@@ -490,6 +630,9 @@ void loop() {
       if(ballx < -10) {
         ballx = 63;
         bally =31;
+        if (orig == 1){
+        tunes.playScore(point);
+        }
         ballright = -1;
         computerscore = computerscore + 1;
       }
@@ -497,6 +640,9 @@ void loop() {
         ballx = 63;
         bally = 31;
         ballright = -1;
+        if (orig == 1) {
+        tunes.playScore(point);
+        }
         playerscore = playerscore +1;
       }
       //Draw the ball
@@ -512,10 +658,16 @@ void loop() {
       //Reflect the ball off of the left side of the screen
       if(ballx == playerx + paddlewidth and playery < bally + ballsize and playery + paddleheight > bally) {
         ballright = 1;
+        if(orig == 1) {
+        tunes.playScore(paddle);
+        }
       }
       //Reflect the ball off of the right side of the screen
       if(ballx + ballsize == computerx and computery < bally + ballsize and computery + paddleheight > bally) {
         ballright = -1;
+        if (orig == 1) {
+        tunes.playScore(paddle);
+        }
       }
       //Move the ball down
       if(balldown == 1) {
@@ -528,10 +680,16 @@ void loop() {
       //Reflect the ball off of the top of the screen
       if(bally == 0) {
         balldown = 1;
+        if(orig == 1) {
+        tunes.playScore(wall);
+        }
       }
       //Reflect the ball off of the bottom of the screen
       if(bally + ballsize == 63) {
         balldown = -1;
+        if(orig == 1) {
+        tunes.playScore(wall);
+        }
       }
       //Draw the player's paddle
       arduboy.fillRect(playerx, playery, paddlewidth, paddleheight, WHITE);
@@ -631,13 +789,17 @@ void loop() {
   if(arduboy.notPressed(B_BUTTON)) {
     justpressedb = 0;
   }
-  if(arduboy.pressed(B_BUTTON) and justpressedb == 0 and arduboy.audio.enabled()) {
+  if(arduboy.notPressed(RIGHT_BUTTON)) {
+    justpressedr = 0;
+  }
+  if(arduboy.notPressed(LEFT_BUTTON)) {
+    justpressedl = 0;
+  }
+  if(sound == 0) {
         arduboy.audio.off();
-        justpressedb = 1;
       }
-      if(arduboy.pressed(B_BUTTON) and justpressedb == 0 and !arduboy.audio.enabled()) {
+      if(sound == 1) {
         arduboy.audio.on();
-        justpressedb = 1;
       }
   arduboy.display();
 }
