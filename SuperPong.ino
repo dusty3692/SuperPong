@@ -1,34 +1,12 @@
-//Jonathan Holmes (crait)
-//December 7th, 2016
-//A simple Pong clone
+//Creator: dusty3692
+//Credit to Jonathan Holmes (crait) for the tutorial
+//SuperPong
 
 #include <Arduboy2.h>
 #include <ArduboyPlaytune.h>
 Arduboy2 arduboy;
 ArduboyPlaytune tunes(arduboy.audio.enabled);
 //Variables declared here
-// Playtune bytestream for file "E:\Arduino Stuff\Resources\4097211-Take_on_Me_-_a-ha.mid" created by MIDI2TONES V1.0.0 on Sun Apr 01 16:44:03 2018
-// command line: midi2tones_64bit.exe E:\Arduino Stuff\Resources\4097211-Take_on_Me_-_a-ha 
-// Playtune bytestream for file "E:\Arduino Stuff\Resources\3024-Chopin_-_Funeral_March.mid" created by MIDI2TONES V1.0.0 on Sun Apr 01 17:32:32 2018
-// command line: midi2tones_64bit.exe E:\Arduino Stuff\Resources\3024-Chopin_-_Funeral_March 
-// Playtune bytestream for file "E:\Arduino Stuff\Resources\Rodland_title.mid" created by MIDI2TONES V1.0.0 on Sun Apr 01 17:59:55 2018
-// command line: midi2tones_64bit.exe E:\Arduino Stuff\Resources\Rodland_title 
-// Playtune bytestream for file "E:\Arduino Stuff\Resources\wbml_gameover.mid" created by MIDI2TONES V1.0.0 on Sun Apr 01 18:02:06 2018
-// command line: midi2tones_64bit.exe E:\Arduino Stuff\Resources\wbml_gameover 
-// Playtune bytestream for file "E:\Arduino Stuff\Resources\128076-TV_Theme_from_Family_Guy.mid" created by MIDI2TONES V1.0.0 on Sun Apr 01 18:15:08 2018
-// command line: midi2tones_64bit.exe E:\Arduino Stuff\Resources\128076-TV_Theme_from_Family_Guy 
-// Playtune bytestream for file "E:\Arduino Stuff\Resources\2462606-Stranger_Things_theme.mid" created by MIDI2TONES V1.0.0 on Sun Apr 01 18:18:26 2018
-// command line: midi2tones_64bit.exe E:\Arduino Stuff\Resources\2462606-Stranger_Things_theme 
-// Playtune bytestream for file "E:\Arduino Stuff\Resources\3979026-Puzzle_Bobble_Theme.mid" created by MIDI2TONES V1.0.0 on Sun Apr 01 18:12:41 2018
-// command line: midi2tones_64bit.exe E:\Arduino Stuff\Resources\3979026-Puzzle_Bobble_Theme 
-// Playtune bytestream for file "E:\Arduino Stuff\Resources\Rodland_title.mid" created by MIDI2TONES V1.0.0 on Sun Apr 01 17:59:55 2018
-// command line: midi2tones_64bit.exe E:\Arduino Stuff\Resources\Rodland_title 
-// Playtune bytestream for file "E:\Arduino Stuff\Resources\ghostgoblin.mid" created by MIDI2TONES V1.0.0 on Sun Apr 01 18:33:31 2018
-// command line: midi2tones_64bit.exe E:\Arduino Stuff\Resources\ghostgoblin 
-// Playtune bytestream for file "E:\Arduino Stuff\Resources\beast-death-dv-v1_0.mid" created by MIDI2TONES V1.0.0 on Sun Apr 01 18:40:28 2018
-// command line: midi2tones_64bit.exe E:\Arduino Stuff\Resources\beast-death-dv-v1_0 
-// Playtune bytestream for file "E:\Arduino Stuff\Resources\RickDangerous.mid" created by MIDI2TONES V1.0.0 on Sun Apr 01 18:50:26 2018
-// command line: midi2tones_64bit.exe E:\Arduino Stuff\Resources\RickDangerous 
 const byte good[] PROGMEM = {
  2,43, 0x90,54, 0x91,49, 0,111, 0x92,42, 0x90,54, 0x91,49, 1,77, 0x92,42, 0x90,61, 0x91,66, 1,77, 0x92,42,
  0x90,61, 0x91,58, 1,77, 0x92,42, 0,222, 0x90,58, 0x91,49, 0,111, 0x92,47, 0x90,54, 0x91,59, 1,77, 0x92,47,
@@ -314,6 +292,7 @@ const unsigned char logo[] PROGMEM = {
 int movechance = 15;
 int gamestate = 0;
 int death = 0;
+int pause = 0;
 int justpressed = 0;
 int justpressedu = 0;
 int justpressedd = 0;
@@ -327,6 +306,7 @@ int balldown = 1;
 int paddlewidth = 4;
 int paddleheight = 9;
 int playerx = 0;
+int endless = 0;
 int playery = 0;
 int computerx = 127 - paddlewidth;
 int computery = 0;
@@ -396,29 +376,43 @@ void loop() {
     }
       //Difficuly set
       if(movechance ==15) {
-        arduboy.setCursor(6,27);
+        arduboy.setCursor(1,27);
         arduboy.print("Difficulty -> EASY");
-        arduboy.setCursor(92,35);
+        arduboy.setCursor(87,35);
         arduboy.print("MEDIUM");
-        arduboy.setCursor(92,43);
+        arduboy.setCursor(87,43);
         arduboy.print("HARD");
       }
       if(movechance == 10) {
-        arduboy.setCursor(92,19);
+        arduboy.setCursor(87,19);
         arduboy.print("EASY");
-        arduboy.setCursor(6,27);
+        arduboy.setCursor(1,27);
         arduboy.print("Difficulty -> MEDIUM");
-        arduboy.setCursor(92,35);
+        arduboy.setCursor(87,35);
         arduboy.print("HARD");
       }
       if(movechance == 5) {
-        arduboy.setCursor(92,11);
+        arduboy.setCursor(87,11);
         arduboy.print("EASY");
-        arduboy.setCursor(92,19);
+        arduboy.setCursor(87,19);
         arduboy.print("MEDIUM");
-        arduboy.setCursor(6,27);
+        arduboy.setCursor(1,27);
         arduboy.print("Difficulty -> HARD");
       }
+      if(movechance ==-1) {
+        arduboy.setCursor(87,3);
+        arduboy.print("EASY");
+        arduboy.setCursor(87,11);
+        arduboy.print("MEDIUM");
+        arduboy.setCursor(87,19);
+        arduboy.print("HARD");
+        arduboy.setCursor(1,27);
+        arduboy.print("Difficulty -> DEVTEST");
+      }
+      if(arduboy.pressed(LEFT_BUTTON) and arduboy.pressed(RIGHT_BUTTON)) {
+        movechance = -1;
+      }
+      
       if(arduboy.pressed(UP_BUTTON) and justpressedu == 0) {
         justpressedu = 1;
         movechance = movechance + 5;
@@ -433,8 +427,45 @@ void loop() {
       if (movechance == 0) {
         movechance = 5;
       }
+      if (movechance == 4) {
+        movechance = 5;
+      }
+      if (movechance == -6) {
+        movechance = -1;
+      }
       if (arduboy.pressed(A_BUTTON) and justpressed == 0) {
+        gamestate = 16;
+        justpressed = 1;
+        tunes.stopScore();
+      }
+      break;
+    case 16:
+      if(!tunes.playing()){
+       tunes.playScore(difficulty);
+      }
+      if(endless == 0) {
+        arduboy.setCursor(24,27);
+        arduboy.print("Endless -> OFF");
+        arduboy.setCursor(92,35);
+        arduboy.print("ON");
+      }
+      if(endless == 1) {
+        arduboy.setCursor(92,19);
+        arduboy.print("OFF");
+        arduboy.setCursor(24,27);
+        arduboy.print("Endless -> ON");
+      }
+      if( arduboy.pressed(UP_BUTTON) and justpressedu == 0) {
+        justpressedu = 1;
+        endless = 0;
+      }
+      if(arduboy.pressed(DOWN_BUTTON) and justpressedd == 0) {
+        justpressedd = 1;
+        endless = 1;
+      }
+      if(arduboy.pressed(A_BUTTON) and justpressed == 0) {
         gamestate = 2;
+        justpressed = 1;
         tunes.stopScore();
       }
       break;
@@ -443,11 +474,11 @@ void loop() {
         tunes.playScore(game);
       }
       //Gameplay screen
-      if(playerscore ==5) {
+      if(playerscore ==5 and endless == 0) {
         gamestate = 3;
         tunes.stopScore();
       }
-      if(computerscore == 5) {
+      if(computerscore == 5 and endless == 0) {
         gamestate = 4;
         tunes.stopScore();
       }
@@ -516,7 +547,7 @@ void loop() {
       //Draw the computer's paddle
       arduboy.fillRect(computerx, computery, paddlewidth, paddleheight, WHITE);
       //If the ball is close to the edge of the screen or if a random number out of 20 is equal to 1
-      if(ballx > 115 or rand() % movechance == 1) {
+      if(ballx > 115 or rand() % movechance == 1 or movechance == -1) {
         //If the ball is higher than the computer's paddle, move the computer's paddle up
         if(bally < computery) {
           computery = computery - 1;
