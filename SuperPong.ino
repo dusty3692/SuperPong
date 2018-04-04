@@ -7,6 +7,18 @@
 Arduboy2 arduboy;
 ArduboyPlaytune tunes(arduboy.audio.enabled);
 //Variables declared here
+const unsigned char one[] PROGMEM = {
+  0xf, 0xf, 0xf, 0xf, 
+};
+const unsigned char two[] PROGMEM = {
+  0xf, 0x9, 0x9, 0xf, 
+};
+const unsigned char three[] PROGMEM = {
+  0x6, 0x9, 0x9, 0x6, 
+};
+const unsigned char four[] PROGMEM = {
+  0x9, 0x6, 0x6, 0x9, 
+};
 const byte wall[] PROGMEM = {
  0x90,58, 0x91,77, 0,23, 0x80, 0,11, 0x81,
  0xf0
@@ -322,6 +334,7 @@ int paddlewidth = 4;
 int paddleheight = 9;
 int playerx = 0;
 int orig = 0;
+int balltype = 1;
 int sound = 1;
 int endless = 0;
 int playery = 0;
@@ -460,7 +473,49 @@ void loop() {
         justpressed = 1;
       }
       break;
+    case 74:
+     if (arduboy.pressed(B_BUTTON) and justpressedb == 0) {
+        gamestate = 16;
+        justpressedb = 1;
+        }
+     if (arduboy.pressed(A_BUTTON) and justpressed == 0) {
+        gamestate = 16;
+        justpressed = 1;
+        }
+    arduboy.setCursor (0,32);
+    arduboy.print("ball type:");
+    arduboy.print(balltype);
+    if(balltype == 1) {
+      arduboy.drawBitmap(90, 50, one ,ballsize, ballsize, WHITE);
+      }
+      if(balltype == 2) {
+      arduboy.drawBitmap(90,50, two ,ballsize, ballsize, WHITE);
+      }
+      if(balltype == 3) {
+      arduboy.drawBitmap(90, 50, three ,ballsize, ballsize, WHITE);
+      }
+      if(balltype == 4) {
+      arduboy.drawBitmap(90, 50, four ,ballsize, ballsize, WHITE);
+      }
+    if (arduboy.pressed(UP_BUTTON) and justpressedu == 0) {
+      balltype = balltype + 1;
+      justpressedu = 1;
+    }
+    if (arduboy.pressed(DOWN_BUTTON) and justpressedd == 0) {
+      balltype = balltype - 1;
+      justpressedd = 1;
+    }
+    if (balltype == 0) {
+      balltype = 1;
+    }
+    if (balltype == 5) {
+      balltype = 4;
+    }
+      break;
     case 16:
+    if (arduboy.pressed(RIGHT_BUTTON) and arduboy.pressed(LEFT_BUTTON)) {
+      gamestate = 74;
+    }
       if(!tunes.playing()){
        tunes.playScore(difficulty);
       }
@@ -519,9 +574,6 @@ void loop() {
       if(sound == 0) {
         orig = 0;
       }
-      if(sound == 0 and menuselect == 2) {
-        gamestate = 54;
-      }
       counter = counter + 1;
        if(counter < 45) {
         arduboy.setCursor(20,55);
@@ -546,6 +598,9 @@ void loop() {
         menuselect = menuselect - 1;
       }
       if (menuselect == 0) {
+        menuselect = 1;
+      }
+      if( sound == 0 and menuselect == 2) {
         menuselect = 1;
       }
       if (menuselect == 3) {
@@ -579,6 +634,7 @@ void loop() {
          arduboy.print("SOUND <OFF");
         }
       }
+      if (sound == 1) {
       if(menuselect == 2) {
         if(arduboy.pressed(RIGHT_BUTTON) and justpressedr == 0) {
         justpressedr = 1;
@@ -607,6 +663,7 @@ void loop() {
          arduboy.print("ORIGINAL SFX <OFF");
         }
        } 
+      }
       break;
     case 2:
       if(!tunes.playing() and orig == 0){
@@ -631,7 +688,9 @@ void loop() {
         ballx = 63;
         bally =31;
         if (orig == 1){
+          arduboy.audio.off();
         tunes.playScore(point);
+        arduboy.audio.on();
         }
         ballright = -1;
         computerscore = computerscore + 1;
@@ -641,12 +700,25 @@ void loop() {
         bally = 31;
         ballright = -1;
         if (orig == 1) {
+          arduboy.audio.off();
         tunes.playScore(point);
+        arduboy.audio.on();
         }
         playerscore = playerscore +1;
       }
       //Draw the ball
-      arduboy.fillRect(ballx, bally, ballsize, ballsize, WHITE);
+      if(balltype == 1) {
+      arduboy.drawBitmap(ballx, bally, one ,ballsize, ballsize, WHITE);
+      }
+      if(balltype == 2) {
+      arduboy.drawBitmap(ballx, bally, two ,ballsize, ballsize, WHITE);
+      }
+      if(balltype == 3) {
+      arduboy.drawBitmap(ballx, bally, three ,ballsize, ballsize, WHITE);
+      }
+      if(balltype == 4) {
+      arduboy.drawBitmap(ballx, bally, four ,ballsize, ballsize, WHITE);
+      }
       //Move the ball right
       if(ballright == 1) {
         ballx = ballx + 1;
